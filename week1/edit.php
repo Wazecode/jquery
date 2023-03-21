@@ -13,6 +13,23 @@ if (isset($_POST['first_name']) &&
 	isset($_POST['headline']) &&
 	isset($_POST['summary']) 
 ) {
+	if(strlen($_POST['first_name']) < 1 ||
+		strlen($_POST['last_name']) < 1 ||
+		strlen($_POST['email']) < 1 ||
+		strlen($_POST['headline']) < 1 ||
+		strlen($_POST['summary']) < 1
+
+	){
+		$_SESSION['error'] = 'All fields are required';
+		header('Location: edit.php?pid='.$_GET['pid']);
+		return;
+	}
+	elseif(!str_contains($_POST['email'], '@')) {
+		$_SESSION['error'] = 'Email must contain (@)';
+		header('Location: edit.php?pid='.$_GET['pid']);
+		return;
+
+	} else {
 	$stmt = $pdo->prepare('UPDATE Profile SET 
 	first_name = :fn,
 	last_name = :ln,
@@ -33,6 +50,7 @@ if (isset($_POST['first_name']) &&
 	$_SESSION['success'] = 'Record Edited';
 	header('Location: reg_index.php');
 	return;
+	}
 }
 
 if(isset($_GET['pid'])) {
@@ -61,6 +79,14 @@ else {
 <body>
 	<h1>Adding Profile for <?=$_SESSION['name']?></h1>
 
+<?php
+if(isset($_SESSION['error'])) {
+	echo '<p style="color: red;">';
+	echo $_SESSION['error'];
+	echo '</p>';
+	unset($_SESSION['error']);
+}
+?>
 	<form method="post">
 		<p>First Name:
 			<input type="text" name="first_name" id="first_name" value="<?=$fn?>" size="60"></p>
@@ -74,7 +100,7 @@ else {
 			<textarea name="summary" rows="8" id="summary" cols="80"><?=$su?></textarea>
 		</p><p>
 			<input type="hidden" name="pid" value="<?= htmlentities($_GET['pid'])?>">
-			<input type="submit" value="Edit" onclick="return validate_entry()">
+			<input type="submit" value="Save" onclick="return validate_entry()">
 			<input type="submit" name="cancel" value="Cancel">
 		</p>
 	</form>

@@ -72,7 +72,7 @@ if(isset($_SESSION['error'])) {
 			Password:
 			<input type="password" name="pass" id="pass">
 		</p>
-		<input type="submit" name="log" onclick="return validate_login()" value="Log in">
+		<input type="submit" name="log" onclick="return validate_login()" value="Log In">
 		<input type="submit" name="cancel" value="cancel">
 	</form>
 	
