@@ -13,6 +13,21 @@ if(!isset($_SESSION['name'])) {
 <body>
 	<h1>Resume Registry</h1>
 
+	<a href="logout.php">Logout</a> <br><br>
+<?php
+if(isset($_SESSION['error'])) {
+	echo '<p style="color: red;">';
+	echo $_SESSION['error'];
+	echo '</p>';
+	unset($_SESSION['error']);
+}
+if(isset($_SESSION['success'])) {
+	echo '<p style="color: green;">';
+	echo $_SESSION['success'];
+	echo '</p>';
+	unset($_SESSION['success']);
+}
+?>
 	<table border="1">
 		<tr>
 			<th>Name</th>
@@ -25,13 +40,13 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 foreach($rows as $row) {
 	echo '<tr>
-			<td> <a href="profile_view.php">'
-				.$row['first_name']." ".$row['last_name'].
+			<td> <a href="profile_view.php?pid='.htmlentities($row['profile_id']).'">'
+				.htmlentities($row['first_name'])." ".htmlentities($row['last_name']).
 			'</a></td>
-			<td>'.$row['headline'].'</td>
+			<td>'.htmlentities($row['headline']).'</td>
 			<td>
-				<a href="edit.php">Edit</a>
-				<a href="delete.php">Delete</a>
+				<a href="edit.php?pid='.$row['profile_id'].'">Edit</a>
+				<a href="delete.php?pid='.$row['profile_id'].'">Delete</a>
 			</td>
 		</tr>';
 }
@@ -39,7 +54,6 @@ foreach($rows as $row) {
 	</table>
 	<br>
 
-	<a href="../index.php">Logout</a>
 	<a href="add.php">Add New Entry</a>
 </body>
 </html>

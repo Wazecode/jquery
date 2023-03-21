@@ -15,14 +15,15 @@ function validate_user($pdo, $mail, $pass) {
 	}
 
 	$salt = 'XyZzy12*_';
-	$stmt = $pdo->query('select email, password from users');
+	$stmt = $pdo->query('select * from users');
 	$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 	
 	foreach($users as $user) {
 		if($user['email'] == $mail) {
 			if($user['password'] == hash('md5', $salt.$pass)) {
-				$_SESSION['name'] = $mail;
+				$_SESSION['name'] = $user['name'];
+				$_SESSION['user_id'] = $user['user_id'];
 				return true;
 			} else {
 				$_SESSION['error'] = 'Incorrect Password';
@@ -71,7 +72,7 @@ if(isset($_SESSION['error'])) {
 			Password:
 			<input type="password" name="pass" id="pass">
 		</p>
-		<input type="submit" name="log" onclick="return validate()" value="Log in">
+		<input type="submit" name="log" onclick="return validate_login()" value="Log in">
 		<input type="submit" name="cancel" value="cancel">
 	</form>
 	
