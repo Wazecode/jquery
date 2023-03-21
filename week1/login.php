@@ -1,35 +1,49 @@
 <?php
 session_start();
+require_once 'pdo.php';
 
-if(isset($_POST['cancel'])) {
-	header("Location: index.php");
-	return;
-} else {
+
+function validate_user($pdo, $mail, $pass) {
+
+	if(strlen($mail) < 1 || strlen($pass) < 1) {
+		$_SESSION['error'] = 'Both the field are required';
+		return false;
+	} 
+	elseif(!str_contains($mail, '@')) {
+		$_SESSION['error'] = 'Email should contain a (@)';
+		return false;
+	}
 
 	$salt = 'XyZzy12*_';
-	$stored_hash = hash('md5', 'XyZzy12*_php123');
+	$stmt = $pdo->query('select email, password from users');
+	$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-	if( isset($_POST['email']) && isset($_POST['pass']) ) {
-		if(strlen($_POST['email']) < 1 || 
-			strlen($_POST['pass']) < 1) {
-			
-			$_SESSION['error'] = 'Both Email and Password are required';
-		} 
-		elseif (strpos($_POST['email'], '@') === false) {
-			$_SESSION['error'] = 'Email must contain (@)';
-		}
-		else {
-			$check = hash('md5', $salt.$_POST['pass']);
-			if($check == $stored_hash) {
-				error_log("Login Success ".$_POST['email']);
-				header('Location: registry/index.php');
-				return;
+	
+	foreach($users as $user) {
+		if($user['email'] == $mail) {
+			if($user['password'] == hash('md5', $salt.$pass)) {
+				$_SESSION['name'] = $mail;
+				return true;
 			} else {
 				$_SESSION['error'] = 'Incorrect Password';
-				error_log("Login Failed".$_POST['email']);
+				return false;
 			}
 		}
-		header('Location: login.php');
+	}
+	$_SESSION['error'] = 'Email dosen\'t exist';
+	return false;
+
+}
+
+if(isset($_POST['email']) || isset($_POST['pass'])) {
+	if(isset($_POST['cancel'])) {
+		header("Location: index.php");
+		return;
+	} elseif(validate_user($pdo, $_POST['email'] , $_POST['pass'])) {
+		header('Location: reg_index.php');
+		return;
+	} else {
+		header("Location: login.php");
 		return;
 	}
 }
@@ -40,17 +54,27 @@ if(isset($_POST['cancel'])) {
 </head>
 <body>
 	<h1>Please Log In</h1>
+	<p style="color: red;">
+<?php
+if(isset($_SESSION['error'])) {
+	echo $_SESSION['error'];
+	unset($_SESSION['error']);
+}
+?>
+	</p>
 	<form method="POST">
 		<p>
 			Email:
-			<input type="text" name="email">
+			<input type="text" name="email" id="email">
 		</p>
 		<p>
 			Password:
-			<input type="password" name="pass">
+			<input type="password" name="pass" id="pass">
 		</p>
-		<input type="submit" name="log" value="Log in">
+		<input type="submit" name="log" onclick="return validate()" value="Log in">
 		<input type="submit" name="cancel" value="cancel">
 	</form>
+	
+<script src="js/validate.js"></script>
 </body>
 </html>
